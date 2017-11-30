@@ -1,0 +1,14 @@
+To define a graph in a text file;
+
+- The first line must contain all the names of the desired nodes for the graph.
+     i) Only a semicolon ';' separating names (no spaces);
+    ii) End line with a full stop '.'.
+
+- Define each edge on a seperate line.
+     i) Only a '->' seperates names (no spaces);
+    ii) Place weight in <> after end node, no space between the two;
+   iii) If it is NOT the last edge put a semicolon ';' after the weight;
+    iv) Otherwise end line with a full stop '.'.
+
+NOTE:
+  Lines cannot be longer than 200 characters
