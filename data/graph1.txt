@@ -1,9 +1,6 @@
-Northampton;Bristol;Swindon;Cardiff.
+Northampton;Bristol;Swindon;Cardiff;Oundle.
 Northampton->Bristol<10>;
-Northampton->Swindon<10>;
-Northampton->Cardiff<100>;
-Bristol->Swindon<50>;
-Bristol->Northampton<20>;
-Cardiff->Swindon<40>;
-Swindon->Northampton<50>;
-Cardiff->Bristol<10>;
+Bristol->Swindon<20>;
+Swindon->Oundle<200>;
+Swindon->Cardiff<70>;
+Cardiff->Oundle<20>;
