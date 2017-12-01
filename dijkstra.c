@@ -19,6 +19,7 @@ struct item {
 };
 
 // Set cost of start position to be 0
+// NOTE: l = list of items to change; g = graph that list references
 void startCost(list *l, graph* g) {
   for (int k = 0; k < numOfVertices(g); k++) {
     if (l -> vertices[k] -> current == l -> start) {
@@ -27,6 +28,7 @@ void startCost(list *l, graph* g) {
 }}}
 
 // Add items to list
+// NOTE: l = list to add items to; g = graph that list references
 list* verticesToList(list* l, graph* g) {
   for (int k = 0; k < numOfVertices(g); k++) {
     item* new = malloc(sizeof(item));
@@ -39,6 +41,7 @@ list* verticesToList(list* l, graph* g) {
 }
 
 // Create list to store details
+// NOTE: s = starting vertex; t = target vertex; g = graph
 list* iniateList(vertex* s, vertex* t, graph* g) {
   list* new = malloc(sizeof(list));
   new -> start = s;
@@ -50,6 +53,7 @@ list* iniateList(vertex* s, vertex* t, graph* g) {
 }
 
 // Return the item which records details about a given vertex
+// NOTE: v = vertex to find item for; l = list to find item in; g = graph that vertex is in
 item* itemFromVertex(vertex* v, list* l, graph* g) {
   for (int k = 0; k < numOfVertices(g); k++) {
     if (strcmp(name(l -> vertices[k] -> current), name(v)) == 0) return l -> vertices[k];
@@ -58,6 +62,7 @@ item* itemFromVertex(vertex* v, list* l, graph* g) {
 }
 
 // Compare the cost of given routes
+// NOTE: n = index of item being read from
 void dijCompare(int n, list* l, graph* g) {
   item* cur = l -> vertices[n];
   if (strcmp(name(cur -> current),name(l -> end)) == 0) return;
@@ -70,12 +75,14 @@ void dijCompare(int n, list* l, graph* g) {
       target -> cost = cost(cur -> current, dest[k]) + cur -> cost;
 }}}
 
+// Returns length of route
 int routeLength(vertex** r, list* l) {
   int n = 1;
   while(strcmp(name(r[n-1]),name(l->start)) != 0) n++;
   return n;
 }
 
+// Reverse path to find shortest route
 vertex** route(list* l, graph* g) {
   vertex** r = malloc(sizeof(l -> start) * numOfVertices(g));
   item* cur = itemFromVertex(l -> end, l ,g);
@@ -90,6 +97,7 @@ vertex** route(list* l, graph* g) {
   return r;
 }
 
+// Print out route to user
 void outputRoute(vertex** r, list* l) {
   printf("------------------------------------\nBest route:\n  ");
   int n = routeLength(r, l);
@@ -110,6 +118,7 @@ void dijkstra(vertex* s, vertex* t, graph* g) {
   outputRoute(r, l);
 }
 
+// Run program, UI pieces
 int mainDijk() {
   int max = 100; bool run = true;
   char *s = malloc(sizeof(char) * max); char *i = malloc(sizeof(char) * max); char *t = malloc(sizeof(char) * max);
