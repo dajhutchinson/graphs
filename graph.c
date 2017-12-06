@@ -108,6 +108,7 @@ bool isConnection(vertex* s, vertex* e) {
 int cost(vertex* s, vertex* e) {
   if (!isConnection(s, e)) return 9999;
   for (int k = 0; k < s -> n; k++) if (s -> edges[k] -> end == e) return s -> edges[k] -> weight;
+  return 9999;
 }
 
 // Returns the number of edges away from a given vertex.
@@ -132,7 +133,7 @@ vertex* fromName(char* s, graph* g) {
 // Returns pointer to vertex at a given index a given graph's list of vertices.
 // Returns NULL is no such vertex.
 vertex* fromPos(int n, graph* g) {
-  if (int n < numOfVertices(g)) return g -> vertices[n];
+  if (n < numOfVertices(g)) return g -> vertices[n];
   return NULL;
 }
 
@@ -232,7 +233,7 @@ graph* edgesFromFile(FILE* in, graph* g) {
 
 // Create a graph from a file, see 'data/rules.txt' for formatting.
 graph* fromFile (char* file) {
-  file[strlen(file)-1] = '\0';
+  if (file[strlen(file)-1] == '\n') file[strlen(file)-1] = '\0';
   int max = 200;
   FILE *in = fopen(file, "r");
   char* line = malloc(sizeof(char) * max);
@@ -244,6 +245,115 @@ graph* fromFile (char* file) {
   return NULL;
 }
 
+// Test intFromString()
+void testConversion() {
+  assert(intFromString(1, "0") == 0);
+  assert(intFromString(6, "999999") == 999999);
+}
+
+// Test that pointers returned from vertex return functions work
+void testPointers() {
+  graph* g = newGraph("Start");
+  addVertex("Middle", g);
+  assert(g -> vertices[0] == fromName("Start", g));
+  assert(g -> vertices[0] == fromPos(0, g));
+  assert(g -> vertices[(g -> n) - 1] == fromName("Middle", g));
+  assert(g -> vertices[(g -> n) - 1] == fromPos(1, g));
+  assert(arrayOfVertices(g)[0] == fromPos(0, g));
+  assert(arrayOfVertices(g)[1] == fromPos(1, g));
+}
+
+// Test creation of graphs, vertices & edges
+void testCreation() {
+  graph* g = newGraph("Start");
+  assert(strcmp(g -> vertices[(g -> n) - 1] -> name, "Start") == 0);
+  assert(g -> n == 1);
+  addVertex("Middle", g);
+  assert(strcmp(g -> vertices[(g -> n) - 1] -> name, "Middle") == 0);
+  assert(g -> n == 2);
+  connectVertices(10, fromName("Start", g), fromName("Middle", g));
+  assert(g -> vertices[0] -> n == 1);
+  assert(g -> vertices[1] -> n == 0);
+  assert(g -> vertices[0] -> edges[0] -> start == fromName("Start", g));
+  assert(g -> vertices[0] -> edges[0] -> weight == 10);
+  assert(g -> vertices[0] -> edges[0] -> end == fromName("Middle", g));
+  connectVertices(50, fromName("Middle", g), fromName("Start", g));
+  assert(g -> vertices[0] -> n == 1);
+  assert(g -> vertices[1] -> n == 1);
+  assert(g -> vertices[1] -> edges[0] -> start == fromName("Middle", g));
+  assert(g -> vertices[1] -> edges[0] -> weight == 50);
+  assert(g -> vertices[1] -> edges[0] -> end == fromName("Start", g));
+}
+
+// Test functions which return data about graphs
+void testGraphDetails() {
+  graph* g = newGraph("Start");
+  addVertex("Middle", g);
+  assert(arrayOfVertices(g)[0] == fromPos(0, g));
+  assert(arrayOfVertices(g)[1] == fromPos(1, g));
+  assert(numOfVertices(g) == 2);
+}
+
+// Test functions which return data about vertices
+void testVertexDetails() {
+  graph* g = newGraph("Start");
+  addVertex("End", g);
+  connectVertices(10, fromName("Start", g), fromName("End", g));
+  assert(numberConnections(fromName("Start", g), g) == 1);
+  assert(numberConnections(fromName("End", g), g) == 0);
+  assert(strcmp(name(fromName("End", g)), "End") == 0);
+  assert(dests(fromName("Start", g), g)[0] == fromName("Start", g) -> edges[0] -> end);
+  assert(dests(fromName("End", g), g)[0] == NULL);
+
+}
+
+// Test functions which return data about edges
+void testEdgeDetails() {
+  graph* g = newGraph("Start");
+  addVertex("End", g);
+  connectVertices(10, fromName("Start", g), fromName("End", g));
+  assert(isConnection(fromName("Start", g), fromName("End", g)) == true);
+  assert(isConnection(fromName("End", g), fromName("Start", g)) == false);
+  assert(cost(fromName("Start", g), fromName("End", g)) == 10);
+  assert(cost(fromName("End", g), fromName("Start", g)) == 9999); //i.e. there is no connection
+}
+
+// Test correct graph is created from file.
+// NOTE: Testing with file data/test.txt
+void testFile() {
+  graph* g = fromFile("data/test.txt");
+  assert(numOfVertices(g) == 3);
+  assert(arrayOfVertices(g)[0] == fromName("End", g));
+  assert(arrayOfVertices(g)[1] == fromName("Middle", g));
+  assert(arrayOfVertices(g)[2] == fromName("Start", g));
+  assert(numberConnections(fromName("Start", g), g) == 2);
+  assert(numberConnections(fromName("Middle", g), g) == 2);
+  assert(numberConnections(fromName("End", g), g) == 0);
+  assert(isConnection(fromName("Start", g), fromName("Middle", g)) == true);
+  assert(isConnection(fromName("Start", g), fromName("End", g)) == true);
+  assert(isConnection(fromName("Middle", g), fromName("Start", g)) == true);
+  assert(isConnection(fromName("Middle", g), fromName("End", g)) == true);
+  assert(isConnection(fromName("End", g), fromName("Start", g)) == false);
+  assert(isConnection(fromName("End", g), fromName("Middle", g)) == false);
+  assert(cost(fromName("Start", g), fromName("Middle", g)) == 20);
+  assert(cost(fromName("Start", g), fromName("End", g)) == 10);
+  assert(cost(fromName("Middle", g), fromName("Start", g)) == 10);
+  assert(cost(fromName("Middle", g), fromName("End", g)) == 50);
+}
+
+// Run tests
+void test() {
+  testConversion();
+  testCreation();
+  testPointers();
+  testGraphDetails();
+  testVertexDetails();
+  testEdgeDetails();
+  testFile();
+}
+
 int graphMain() {
+  test();
+  printf("All test passed. :)\n");
   return 0;
 }

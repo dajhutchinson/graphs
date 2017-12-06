@@ -11,13 +11,23 @@ USAGE:
 creating graph.txt files
 - Check out 'data/rules.txt'.
 graph.c
-- Look at graph.h to see what functions are avaiable and their parameters. I will add comments later with more usage details.
+- Look at graph.h to see what functions are avaiable and their parameters;
+- Running graph.c will run automatic tests on file.
 dijkstra.c
 - Running this program you will be asked to enter the name of the graph you wish to load (the root path of this file is best);
 - Then you will be asked to enter start and end locations;
-- Enter '.' to end the program.
+- Enter '.' to end the program;
+- Enter ',' to run tests.
 
 KNOWN ISSUES:
 (There are many, but the most notework)
 - If you request to find the path between two locations between which no path exists, then the program will crash;
 - Spelling errors cause the program to crash.
+
+RECOMMENDED COMPILATION COMMANDS:
+graph.c
+- gcc -std=c99 -DgraphMain=main graph.c -o graph
+dijkstra.c
+- gcc -std=c99 -c graph.c
+- gcc -std=c99 -DmainDijk=main -c dijkstra.c
+- gcc -std=c99 graph.o dijkstra.o -o dij

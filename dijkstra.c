@@ -108,6 +108,13 @@ void outputRoute(vertex** r, list* l) {
   printf("------------------------------------\n");
 }
 
+// Test correct route is outputted
+void testRoute(vertex** r, graph* g, list* l) {
+  assert(routeLength(r, l) == 2);
+  assert(r[0] == fromName("Start", g));
+  assert(r[1] == fromName("End", g));
+}
+
 // Perform dijkstra algorithm
 void dijkstra(vertex* s, vertex* t, graph* g) {
   list* l = iniateList(s, t, g);
@@ -115,7 +122,34 @@ void dijkstra(vertex* s, vertex* t, graph* g) {
     dijCompare(k, l, g);
   }
   vertex** r = route(l, g);
+  testRoute(r, g, l);
   outputRoute(r, l);
+}
+
+// Test list is created properly
+void testList(list* l, vertex* s, vertex* t, graph* g) {
+  assert(l -> start == s);
+  assert(l -> end == t);
+  assert(l -> vertices[0] -> current == fromName("End", g));
+  assert(l -> vertices[1] -> current == fromName("Middle", g));
+  assert(l -> vertices[2] -> current == fromName("Start", g));
+  assert(l -> vertices[0] -> previous == NULL);
+  assert(l -> vertices[1] -> previous == NULL);
+  assert(l -> vertices[2] -> previous == NULL);
+  assert(l -> vertices[2] -> cost == 0);
+  assert(l -> vertices[1] -> cost == 9999);
+  assert(l -> vertices[0] -> cost == 9999);
+}
+
+// Run tests
+void dijkTest() {
+  graph* g = fromFile("data/test.txt");
+  list* l = iniateList(fromName("Start", g), fromName("End", g), g);
+  testList(l, fromName("Start", g), fromName("End", g), g);
+  for (int k = 0; k < numOfVertices(g); k++) {
+    dijCompare(k, l, g);
+  }
+  printf("All tests passed. :)\n");
 }
 
 // Run program, UI pieces
@@ -125,6 +159,7 @@ int mainDijk() {
   printf("Enter graph to load:\n>  ");
   if(fgets(s, max, stdin) != NULL) {
     if(strcmp(s, ".\n") == 0) return 0;
+    else if(strcmp(s, ",\n") == 0) {dijkTest(); return 0;}
     graph* g = fromFile(s);
     while(run) {
       printf("Locations:\n");
