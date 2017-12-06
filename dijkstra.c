@@ -108,11 +108,18 @@ void outputRoute(vertex** r, list* l) {
   printf("------------------------------------\n");
 }
 
+// Delete used list
+void deleteList(graph* g, list* l) {
+  for (int k = 0; k < numOfVertices(g); k++) free(l -> vertices[k]);
+  free(l);
+}
+
 // Test correct route is outputted
+// Assumes route from "Start" -> "End"
 void testRoute(vertex** r, graph* g, list* l) {
   assert(routeLength(r, l) == 2);
-  assert(r[0] == fromName("Start", g));
-  assert(r[1] == fromName("End", g));
+  assert(r[0] == fromName("End", g));
+  assert(r[1] == fromName("Start", g));
 }
 
 // Perform dijkstra algorithm
@@ -122,8 +129,8 @@ void dijkstra(vertex* s, vertex* t, graph* g) {
     dijCompare(k, l, g);
   }
   vertex** r = route(l, g);
-  testRoute(r, g, l);
   outputRoute(r, l);
+  //deleteList(g, l);
 }
 
 // Test list is created properly
@@ -149,6 +156,8 @@ void dijkTest() {
   for (int k = 0; k < numOfVertices(g); k++) {
     dijCompare(k, l, g);
   }
+  vertex** r = route(l, g);
+  testRoute(r, g, l);
   printf("All tests passed. :)\n");
 }
 
@@ -158,18 +167,21 @@ int mainDijk() {
   char *s = malloc(sizeof(char) * max); char *i = malloc(sizeof(char) * max); char *t = malloc(sizeof(char) * max);
   printf("Enter graph to load:\n>  ");
   if(fgets(s, max, stdin) != NULL) {
-    if(strcmp(s, ".\n") == 0) return 0;
-    else if(strcmp(s, ",\n") == 0) {dijkTest(); return 0;}
+    if(strcmp(s, ",\n") == 0) {dijkTest(); return 0;}
     graph* g = fromFile(s);
+    if(strcmp(s, ".\n") == 0) {deleteGraph(g); return 0;}
     while(run) {
       printf("Locations:\n");
       outputVertices(g);
       printf("\nWhere do you want to start:\n>  ");
       if(fgets(i,max,stdin) != NULL);
       if(strcmp(i, ".\n") == 0) return 0;
+      else if(strcmp(i, ",\n") == 0) {dijkTest(); deleteGraph(g); return 0;}
+      if(strcmp(i, ".\n") == 0) {deleteGraph(g); return 0;}
       printf("\nWhere do you want to finish:\n>  ");
       if(fgets(t,max,stdin) != NULL);
-      if(strcmp(i, ".\n") == 0) return 0;
+      if(strcmp(t, ".\n") == 0) {deleteGraph(g); return 0;}
+      else if(strcmp(t, ",\n") == 0) {dijkTest(); deleteGraph(g); return 0;}
       i[strlen(i)-1] = '\0'; t[strlen(t)-1] = '\0';
       dijkstra(fromName(i, g), fromName(t, g), g);
     }

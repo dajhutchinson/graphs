@@ -16,8 +16,10 @@
 
 struct graph;
 struct vertex;
+struct edge;
 typedef struct graph graph;
 typedef struct vertex vertex;
+typedef struct edge edge;
 
 // Create a new graph, requires name for first vertex.
 graph* newGraph(char* name);
@@ -50,6 +52,9 @@ int numOfVertices(graph* g);
 // Returns an array of pointers to all the vertices in a given graph.
 vertex** arrayOfVertices(graph* g);
 
+// Returns an array of pointers to all the edges from a given vertex
+edge** arrayOfEdges(vertex* v);
+
 // Return the weighting on an edge between two given vertices.
 // Returns 9999 if there is no such edge.
 // NOTE: s = start vertex; e = end vertex.
@@ -68,3 +73,8 @@ vertex** dests(vertex* v, graph* g);
 
 // Returns the number of edges away from a given vertex.
 int numberConnections(vertex* s, graph* g);
+
+// Delete graph, vertex or edges
+void deleteEdge(edge* e, vertex* v);
+void deleteVertex(vertex* v, graph* g);
+void deleteGraph(graph* g);

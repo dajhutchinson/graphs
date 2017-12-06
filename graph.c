@@ -5,9 +5,6 @@
 #include <string.h>
 #include <assert.h>
 
-struct edge;
-typedef struct edge edge;
-
 // A collection of vertices
 struct graph {
   int n; //Number of vertices in a graph
@@ -88,6 +85,11 @@ void connectVertices(int w, vertex* s, vertex* e) {
 // Returns an array of pointers to all the vertices in a given graph.
 vertex** arrayOfVertices(graph* g) {
   return g -> vertices;
+}
+
+// Returns an array of pointers to all the edges from a given vertex
+edge** arrayOfEdges(vertex* v) {
+  return v -> edges;
 }
 
 // Returns the number of vertices in a given graph.
@@ -232,7 +234,7 @@ graph* edgesFromFile(FILE* in, graph* g) {
 }
 
 // Create a graph from a file, see 'data/rules.txt' for formatting.
-graph* fromFile (char* file) {
+graph* fromFile(char* file) {
   if (file[strlen(file)-1] == '\n') file[strlen(file)-1] = '\0';
   int max = 200;
   FILE *in = fopen(file, "r");
@@ -243,6 +245,34 @@ graph* fromFile (char* file) {
     return g;
   }
   return NULL;
+}
+
+// Remove an edge from a vertex
+void deleteEdge(edge* e, vertex* v) {
+  int en = 0;
+  for (int k = 0; k < v -> n; k++) if (v -> edges[k] == e) {en = k; break;}
+  free(v -> edges[en]);
+  for (int k = en; k < v -> n - 1; k++) v -> edges[k] = v -> edges[k+1];
+  v -> n--;
+  v -> edges = realloc(v -> edges, sizeof(edge) * v -> n);
+}
+
+// Remove a vertex from a graph
+void deleteVertex(vertex* v, graph* g) {
+  int vn = 0;
+  for (int k = 0; k < g -> n; k++) if (g -> vertices[k] == v) {vn = k; break;}
+  for (int k = 0; k < v -> n; k++) deleteEdge(v -> edges[k], v);
+  free(g -> vertices[vn]);
+  for (int k = vn; k < g -> n - 1; k++) g -> vertices[k] = g -> vertices[k+1];
+  g -> n--;
+  g -> vertices = realloc(g -> vertices, sizeof(vertex) * g -> n);
+}
+
+// Delete a graphs
+void deleteGraph(graph* g) {
+  int i = g -> n;
+  for (int k = 0; k < i; k++) deleteVertex(fromPos(0, g), g);
+  free(g);
 }
 
 // Test intFromString()
@@ -341,6 +371,23 @@ void testFile() {
   assert(cost(fromName("Middle", g), fromName("End", g)) == 50);
 }
 
+// Test deleteEdge(), deleteVertex()
+void testDeletion() {
+  graph* g = fromFile("data/test.txt");
+  vertex* v = fromPos(1,g); // "Middle"
+  edge* e = arrayOfEdges(v)[0]; // "Middle->Start"
+  assert(v -> n == 2);
+  assert(v -> edges[0] == e);
+  deleteEdge(e, v);
+  assert(v -> n == 1);
+  assert(v -> edges[0] != e);
+  assert(g -> n == 3);
+  assert(g -> vertices[1] == v);
+  deleteVertex(v, g);
+  assert(g -> n == 2);
+  assert(g -> vertices[1] !=   v);
+}
+
 // Run tests
 void test() {
   testConversion();
@@ -350,10 +397,11 @@ void test() {
   testVertexDetails();
   testEdgeDetails();
   testFile();
+  testDeletion();
+  printf("All test passed. :)\n");
 }
 
 int graphMain() {
   test();
-  printf("All test passed. :)\n");
   return 0;
 }
